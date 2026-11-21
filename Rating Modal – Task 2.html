@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rating Modal – Task 2</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--page:#eef0f6;--page-text:#1c2340}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0e1120;--page-text:#e8eaf6}}
+:root[data-theme="dark"]{--page:#0e1120;--page-text:#e8eaf6}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--page);color:var(--page-text);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;line-height:1.5}
+header{padding:32px 20px 8px;max-width:1100px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+header p{margin:0;opacity:.75;max-width:60ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px;max-width:1100px;margin:0 auto;padding:20px}
+.scene{border-radius:20px;padding:28px 16px;min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg);color:var(--text)}
+.scene>small{font-size:.8rem;color:var(--muted)}
+.scene.light{--bg:#e9ecf5;--card:#ffffff;--text:#1c2340;--muted:#5a6280;--line:#c9cee0;--star-off:#c3c8da;--star-on:#f2a900;--primary:#3b3fd8;--primary-text:#fff;--field:#f6f7fb;--ring:#3b3fd8;--shadow:0 20px 50px rgba(28,35,64,.18)}
+.scene.dark{--bg:#0b0e1c;--card:#1a1f38;--text:#eceefb;--muted:#a3a9c9;--line:#363c60;--star-off:#4a5078;--star-on:#ffc933;--primary:#8d90ff;--primary-text:#10132b;--field:#12162b;--ring:#b3b5ff;--shadow:0 20px 50px rgba(0,0,0,.55)}
+.modal{position:relative;width:100%;max-width:380px;background:var(--card);border-radius:20px;padding:28px 24px 24px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.close:hover{background:var(--field)}
+.modal h2{font-size:1.3rem;margin:0 0 4px;padding-right:32px}
+.sub{margin:0 0 20px;color:var(--muted);font-size:.92rem}
+.stars{display:flex;justify-content:space-between;gap:4px;border:0;padding:0;margin:0 0 6px}
+.stars legend{position:absolute;left:-9999px}
+.stars label{flex:1;display:flex;justify-content:center;cursor:pointer}
+.stars input{position:absolute;opacity:0;pointer-events:none}
+.stars svg{width:44px;height:44px;fill:var(--star-off);transition:fill .15s,transform .15s}
+.stars label.on svg{fill:var(--star-on)}
+.stars label:hover svg{transform:scale(1.12)}
+.stars input:focus-visible+svg{outline:3px solid var(--ring);outline-offset:3px;border-radius:8px}
+.label{min-height:1.5em;text-align:center;font-weight:600;margin:0 0 18px;font-size:.95rem}
+.field-head{display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:6px}
+.field-head span:last-child{color:var(--muted)}
+textarea{width:100%;min-height:96px;resize:vertical;border-radius:12px;border:1.5px solid var(--line);background:var(--field);color:var(--text);padding:12px;font:inherit;font-size:.95rem}
+textarea::placeholder{color:var(--muted)}
+textarea:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 30%,transparent)}
+.count{display:block;text-align:right;font-size:.78rem;color:var(--muted);margin:4px 0 16px}
+.actions{display:flex;gap:10px}
+button.btn{flex:1;height:48px;border-radius:12px;font:inherit;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:opacity .15s,transform .1s}
+.btn.primary{background:var(--primary);color:var(--primary-text)}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary:not(:disabled):active{transform:scale(.98)}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--line);flex:0 0 auto;padding:0 18px}
+.btn:focus-visible,.close:focus-visible{outline:3px solid var(--ring);outline-offset:2px}
+.done{display:none;text-align:center;padding:12px 0 4px}
+.done .tick{width:64px;height:64px;border-radius:50%;background:var(--primary);margin:0 auto 14px;display:grid;place-items:center}
+.done .tick svg{width:32px;height:32px;stroke:var(--primary-text);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30}
+.modal.sent .done .tick svg{animation:draw .45s .1s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.modal.sent .form{display:none}
+.modal.sent .done{display:block}
+.done h2{padding:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01s!important}}
+@media (max-width:400px){.stars svg{width:38px;height:38px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Rating modal</h1>
+  <p>Pick a star rating, add an optional comment, and send. Shown on a light and a dark background. Both are fully interactive.</p>
+</header>
+<main class="grid">
+  <section class="scene light" aria-label="Light background version"><small>Light background</small></section>
+  <section class="scene dark" aria-label="Dark background version"><small>Dark background</small></section>
+</main>
+
+<template id="tpl">
+  <div class="modal" role="dialog" aria-labelledby="t-ID">
+    <button class="close" aria-label="Close">×</button>
+    <div class="form">
+      <h2 id="t-ID">How was your order?</h2>
+      <p class="sub">Your rating helps other shoppers and the seller.</p>
+      <fieldset class="stars">
+        <legend>Rating from 1 to 5 stars</legend>
+      </fieldset>
+      <p class="label" aria-live="polite">Tap a star to rate</p>
+      <div class="field-head"><label for="c-ID">Comment</label><span>Optional</span></div>
+      <textarea id="c-ID" maxlength="200" placeholder="What did you like or dislike?"></textarea>
+      <span class="count">0 / 200</span>
+      <div class="actions">
+        <button class="btn ghost" type="button">Not now</button>
+        <button class="btn primary" type="button" disabled>Send rating</button>
+      </div>
+    </div>
+    <div class="done" role="status">
+      <div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h2>Thanks for your rating</h2>
+      <p class="sub">Your feedback was sent.</p>
+      <button class="btn ghost" type="button" style="width:100%">Rate again</button>
+    </div>
+  </div>
+</template>
+
+<script>
+var WORDS=["","Poor","Fair","Good","Very good","Excellent"];
+var STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+function build(scene,id){
+  var html=document.getElementById("tpl").innerHTML.replace(/ID/g,id);
+  var wrap=document.createElement("div");wrap.innerHTML=html;
+  var m=wrap.firstElementChild;scene.insertBefore(m,scene.firstChild);
+  var set=m.querySelector(".stars"),lab=m.querySelector(".label"),ta=m.querySelector("textarea"),
+      cnt=m.querySelector(".count"),send=m.querySelector(".primary"),val=0,i;
+  for(i=1;i<=5;i++){
+    var l=document.createElement("label");
+    l.innerHTML='<input type="radio" name="r-'+id+'" value="'+i+'" aria-label="'+i+(i>1?' stars':' star')+'">'+STAR;
+    set.appendChild(l);
+  }
+  var labels=set.querySelectorAll("label");
+  function paint(n){labels.forEach(function(x,k){x.classList.toggle("on",k<n)});lab.textContent=n?WORDS[n]:"Tap a star to rate"}
+  labels.forEach(function(x,k){
+    x.addEventListener("mouseenter",function(){paint(k+1)});
+    x.querySelector("input").addEventListener("change",function(){val=k+1;paint(val);send.disabled=false});
+  });
+  set.addEventListener("mouseleave",function(){paint(val)});
+  ta.addEventListener("input",function(){cnt.textContent=ta.value.length+" / 200"});
+  send.addEventListener("click",function(){m.classList.add("sent")});
+  function reset(){m.classList.remove("sent");val=0;paint(0);send.disabled=true;ta.value="";cnt.textContent="0 / 200";
+    set.querySelectorAll("input").forEach(function(x){x.checked=false})}
+  m.querySelector(".done .btn").addEventListener("click",reset);
+  m.querySelector(".actions .ghost").addEventListener("click",reset);
+  m.querySelector(".close").addEventListener("click",reset);
+}
+document.querySelectorAll(".scene").forEach(function(s,n){build(s,"m"+n)});
+</script>
+</body>
+</html>
